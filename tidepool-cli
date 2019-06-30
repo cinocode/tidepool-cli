@@ -1,0 +1,40 @@
+#!/bin/bash
+tidepool_api=https://int-api.tidepool.org
+client_headers="X-Tidepool-Client-Name:com.github.cinocode.tidepool-cli X-Tidepool-Client-Version:0.1.0"
+mkdir -p ~/.cache/tidepool-cli
+resp_file=~/.cache/tidepool-cli/resp
+
+http -v POST ${tidepool_api}/auth/login $client_headers > $resp_file
+
+session_token=$(cat $resp_file | grep 'x-tidepool-session-token:' | cut -d ' ' -f 2)
+user_id=$(cat $resp_file | grep '{' | jq -r '.userid')
+data_headers="x-tidepool-session-token:${session_token} Content-Type:application/json"
+
+params="startDate=$(date +%Y-%m-%dT%H:%M:00.000Z -u -d "45 min ago")"
+http GET ${tidepool_api}/data/${user_id}?${params} $client_headers $data_headers > $resp_file
+
+data_length=$(cat $resp_file | jq '. | length')
+
+if [ $data_length -gt 1 ]; then
+    prev_bg_val_in=$(cat $resp_file | jq -r '.[1]' | jq -r '.value')
+    prev_bg_val=$(awk "BEGIN {print $prev_bg_val_in * 18.01559}")
+
+    bg_val_in=$(cat $resp_file | jq -r '.[0]' | jq -r '.value')
+    bg_val=$(awk "BEGIN {print $bg_val_in * 18.01559}")
+
+    bg_diff=$(awk "BEGIN {print $bg_val - $prev_bg_val}")
+
+    printf "bg_value: $bg_val\n"
+
+    if [ $bg_diff -lt -25 ]; then
+        echo "state: dropping fast"
+    elif [ $bg_diff -lt 10 ]; then
+        echo "state: dropping slow"
+    elif [ $bg_diff -gt 25 ]; then
+        echo "state: rising fast"
+    elif [ $bg_diff -gt 10 ]; then
+        echo "state: rising slow"
+    else
+        echo "state: steady"
+    fi
+fi
