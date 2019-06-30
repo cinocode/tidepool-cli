@@ -6,3 +6,7 @@ Auth Config via ~/.netrc:
 machine int-api.tidepool.org
 login your@mail.com
 password secret_pass_here
+
+Usage:
+Put tidepool-cli in your $PATH and call it.
+You can display the output in whatever way you choose. Here is my waybar module script as an example: https://github.com/cinocode/dotfiles/blob/master/.config/waybar/modules/tidepool.sh
