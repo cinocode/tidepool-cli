@@ -37,4 +37,20 @@ if [ $data_length -gt 1 ]; then
     else
         echo "state: steady"
     fi
+
+    if [ $bg_val -gt 220 ]; then
+        echo "class: red"
+    elif [ $bg_val -gt 190 ]; then
+        echo "class: orange"
+    elif [ $bg_val -gt 170 ]; then
+        echo "class: yellow"
+    elif [ $bg_val -gt 100 ]; then
+        echo "class: green"
+    elif [ $bg_val -gt 85 ]; then
+        echo "class: yellow"
+    elif [ $bg_val -gt 75 ]; then
+        echo "class: orange"
+    else
+        echo "class: red"
+    fi
 fi
