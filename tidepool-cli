@@ -93,6 +93,8 @@ print_bsg() {
         fi
 
         echo "{\"text\":\"$op_text\", \"class\":\"$op_class\"}"
+    else
+        echo "{\"text\":\"\", \"class\":\"none\"}"
     fi
 }
 
