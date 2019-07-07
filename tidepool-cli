@@ -100,9 +100,9 @@ print_bsg() {
 
 if [ $opt_help -eq 1 ]; then
     echo "Call: tidepool-cli [-c cache_age_minutes] [-f {mgdl/mmol}] [-h]"
-    echo " -c    set the cache age in minutes - after the duration expires the script will query a fresh value"
-    echo " -f    set the output format - defaults to: 'mgdl' = mg/dl and can be set to 'mmol' = mmol/l"
-    echo " -h    prints this help"
+    echo " -c, --cache      set the cache age in minutes - defaults to 5 - after the duration expires the script will query a fresh value"
+    echo " -f, --format     set the output format - defaults to: 'mgdl' = mg/dl and can be set to 'mmol' = mmol/l"
+    echo " -h, --help       prints this help"
 
 else
     print_bsg

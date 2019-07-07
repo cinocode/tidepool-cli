@@ -9,8 +9,8 @@ password secret_pass_here
 
 Usage:
 Call: tidepool-cli [-c cache_age_minutes] [-f {mgdl/mmol}] [-h]
- -c    set the cache age in minutes - after the duration expires the script will query a fresh value
- -f    set the output format: 'mgdl' = mg/dl or 'mmol' = mmol/l
- -h    prints this help
+ -c, --cache      set the cache age in minutes - defaults to 5 - after the duration expires the script will query a fresh value
+ -f, --format     set the output format - defaults to: 'mgdl' = mg/dl and can be set to 'mmol' = mmol/l
+ -h, --help       prints this help
 
 You can display the output in whatever way you choose. Here is my waybar config as an example: https://github.com/cinocode/dotfiles/blob/master/.config/waybar/config
