@@ -1,25 +1,35 @@
 #!/bin/bash
 tidepool_api=https://int-api.tidepool.org
 client_headers="X-Tidepool-Client-Name:com.github.cinocode.tidepool-cli X-Tidepool-Client-Version:0.1.0"
-mkdir -p ~/.cache/tidepool-cli
-resp_file=~/.cache/tidepool-cli/resp
 
-http -v POST ${tidepool_api}/auth/login $client_headers > $resp_file
+cache_dir=~/.cache/tidepool-cli
+if [ ! -d $cache_dir ]; then
+    mkdir -p $cache_dir
+fi
+if [ ! -f $cache_dir/data ]; then
+    touch $cache_dir/data
+fi
 
-session_token=$(cat $resp_file | grep 'x-tidepool-session-token:' | cut -d ' ' -f 2)
-user_id=$(cat $resp_file | grep '{' | jq -r '.userid')
-data_headers="x-tidepool-session-token:${session_token} Content-Type:application/json"
+cache_age=$(($(date +%s) - $(stat -c '%Y' "$cache_dir/data")))
 
-params="startDate=$(date +%Y-%m-%dT%H:%M:00.000Z -u -d "45 min ago")"
-http GET ${tidepool_api}/data/${user_id}?${params} $client_headers $data_headers > $resp_file
+if [ $cache_age -gt 300 ] || [ ! -s "$cache_dir/data" ]; then
+  http -v POST ${tidepool_api}/auth/login $client_headers > $cache_dir/token
 
-data_length=$(cat $resp_file | jq '. | length')
+  session_token=$(cat $cache_dir/token | grep 'x-tidepool-session-token:' | cut -d ' ' -f 2)
+  user_id=$(cat $cache_dir/token | grep '{' | jq -r '.userid')
+  data_headers="x-tidepool-session-token:${session_token} Content-Type:application/json"
+
+  params="startDate=$(date +%Y-%m-%dT%H:%M:00.000Z -u -d "45 min ago")"
+  http GET ${tidepool_api}/data/${user_id}?${params} $client_headers $data_headers > $cache_dir/data
+fi
+
+data_length=$(cat $cache_dir/data | jq '. | length')
 
 if [ $data_length -gt 1 ]; then
-    prev_bg_val_in=$(cat $resp_file | jq -r '.[1]' | jq -r '.value')
+    prev_bg_val_in=$(cat $cache_dir/data | jq -r '.[1]' | jq -r '.value')
     prev_bg_val=$(awk "BEGIN {print $prev_bg_val_in * 18.01559}")
 
-    bg_val_in=$(cat $resp_file | jq -r '.[0]' | jq -r '.value')
+    bg_val_in=$(cat $cache_dir/data | jq -r '.[0]' | jq -r '.value')
     bg_val=$(awk "BEGIN {print $bg_val_in * 18.01559}")
 
     bg_diff=$(awk "BEGIN {print $bg_val - $prev_bg_val}")
