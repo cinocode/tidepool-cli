@@ -3,6 +3,24 @@ tidepool_api=https://int-api.tidepool.org
 client_headers="X-Tidepool-Client-Name:com.github.cinocode.tidepool-cli X-Tidepool-Client-Version:0.1.0"
 cache_dir=~/.cache/tidepool-cli
 
+opt_cache_age_min=5
+opt_format='mgdl'
+opt_help=0
+
+while [ "$1" != "" ]; do
+    case $1 in
+        -c | --cache )           shift
+            opt_cache_age_min=$1
+            ;;
+        -f | --format )    shift
+            opt_format=$1
+            ;;
+        -h | --help )           opt_help=1
+            ;;
+    esac
+    shift
+done
+
 print_bsg() {
     if [ ! -d $cache_dir ]; then
         mkdir -p $cache_dir
@@ -12,8 +30,12 @@ print_bsg() {
     fi
 
     cache_age=$(($(date +%s) - $(stat -c '%Y' "$cache_dir/data")))
+    if [ $opt_cache_age_min -lt 1 ]; then
+        opt_cache_age_min=5
+    fi
+    opt_cache_age_sec=$(($opt_cache_age_min * 60))
 
-    if [ $cache_age -gt 300 ] || [ ! -s "$cache_dir/data" ]; then
+    if [ $cache_age -gt $opt_cache_age_sec ] || [ ! -s "$cache_dir/data" ]; then
         http -v POST ${tidepool_api}/auth/login $client_headers > $cache_dir/token
 
         session_token=$(cat $cache_dir/token | grep 'x-tidepool-session-token:' | cut -d ' ' -f 2)
@@ -32,10 +54,15 @@ print_bsg() {
 
         bg_val_in=$(cat $cache_dir/data | jq -r '.[0]' | jq -r '.value')
         bg_val=$(awk "BEGIN {print $bg_val_in * 18.01559}")
+        bg_val_mmol=$(awk "BEGIN {print $bg_val_in}")
 
         bg_diff=$(awk "BEGIN {print $bg_val - $prev_bg_val}")
 
-        printf "bg_value: $bg_val\n"
+        if [ $opt_format = 'mgdl' ]; then
+            printf "bg_value: $bg_val\n"
+        else
+            printf "bg_value: $bg_val_mmol\n"
+        fi
 
         if [ $bg_diff -lt -25 ]; then
             echo "state: dropping fast"
@@ -67,4 +94,12 @@ print_bsg() {
     fi
 }
 
-print_bsg
+if [ $opt_help -eq 1 ]; then
+    echo "Call: tidepool-cli [-c cache_age_minutes] [-f {mgdl/mmol}] [-h]"
+    echo " -c    set the cache age in minutes - after the duration expires the script will query a fresh value"
+    echo " -f    set the output format - defaults to: 'mgdl' = mg/dl and can be set to 'mmol' = mmol/l"
+    echo " -h    prints this help"
+
+else
+    print_bsg
+fi

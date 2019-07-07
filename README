@@ -8,5 +8,10 @@ login your@mail.com
 password secret_pass_here
 
 Usage:
-Put tidepool-cli in your $PATH and call it.
+Call: tidepool-cli [-c cache_age_minutes] [-f {mgdl/mmol}] [-h]
+ -c    set the cache age in minutes - after the duration expires the script will query a fresh value
+ -f    set the output format: 'mgdl' = mg/dl or 'mmol' = mmol/l
+ -h    prints this help
+
 You can display the output in whatever way you choose. Here is my waybar module script as an example: https://github.com/cinocode/dotfiles/blob/master/.config/waybar/modules/tidepool.sh
+
