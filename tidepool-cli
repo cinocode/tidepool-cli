@@ -58,39 +58,41 @@ print_bsg() {
 
         bg_diff=$(awk "BEGIN {print $bg_val - $prev_bg_val}")
 
-        if [ $opt_format = 'mgdl' ]; then
-            printf "bg_value: $bg_val\n"
-        else
-            printf "bg_value: $bg_val_mmol\n"
-        fi
-
         if [ $bg_diff -lt -25 ]; then
-            echo "state: dropping fast"
+            op_arrow="🡓"
         elif [ $bg_diff -lt 10 ]; then
-            echo "state: dropping slow"
+            op_arrow="🡖"
         elif [ $bg_diff -gt 25 ]; then
-            echo "state: rising fast"
+            op_arrow="🡑"
         elif [ $bg_diff -gt 10 ]; then
-            echo "state: rising slow"
+            op_arrow="🡕"
         else
-            echo "state: steady"
+            op_arrow="🡒"
         fi
 
         if [ $bg_val -gt 220 ]; then
-            echo "class: red"
+            op_class="red"
         elif [ $bg_val -gt 190 ]; then
-            echo "class: orange"
+            op_class="orange"
         elif [ $bg_val -gt 170 ]; then
-            echo "class: yellow"
+            op_class="yellow"
         elif [ $bg_val -gt 100 ]; then
-            echo "class: green"
+            op_class="green"
         elif [ $bg_val -gt 85 ]; then
-            echo "class: yellow"
+            op_class="yellow"
         elif [ $bg_val -gt 75 ]; then
-            echo "class: orange"
+            op_class="orange"
         else
-            echo "class: red"
+            op_class="red"
         fi
+
+        if [ $opt_format = 'mgdl' ]; then
+            op_text="$bg_val $op_arrow"
+        else
+            op_text="$bg_val_mmol $op_arrow"
+        fi
+
+        echo "{\"text\":\"$op_text\", \"class\":\"$op_class\"}"
     fi
 }
 
