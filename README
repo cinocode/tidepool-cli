@@ -3,7 +3,7 @@ A bash script to read out the latest blood sugar value from tidepool.
 Dependencies: httpie, jq
 
 Auth Config via ~/.netrc:
-machine int-api.tidepool.org
+machine api.tidepool.org
 login your@mail.com
 password secret_pass_here
 

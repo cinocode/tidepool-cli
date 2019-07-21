@@ -1,6 +1,6 @@
 #!/bin/bash
-tidepool_api=https://int-api.tidepool.org
-client_headers="X-Tidepool-Client-Name:com.github.cinocode.tidepool-cli X-Tidepool-Client-Version:0.1.0"
+tidepool_api=https://api.tidepool.org
+client_headers="X-Tidepool-Client-Name:com.github.cinocode.tidepool-cli X-Tidepool-Client-Version:1.0.0"
 cache_dir=~/.cache/tidepool-cli
 
 opt_cache_age_min=5
